@@ -10,9 +10,17 @@ function App() {
 
   const obterTaxaConversao = (de, para) => {
     if (de === para) return 1;
-    if (de === "eur" && para === "dol") return 1.16;
-    if (de === "dol" && para === "eur") return 0.86;
-    return 1; // padrão de fallback
+
+    const taxas = {
+      eur: { dol: 1.16, brl: 5.4, gbp: 0.85, jpy: 156.3, cad: 1.5 },
+      dol: { eur: 0.86, brl: 4.65, gbp: 0.73, jpy: 134.5, cad: 1.29 },
+      brl: { eur: 0.18, dol: 0.22, gbp: 0.16, jpy: 28.9, cad: 0.28 },
+      gbp: { eur: 1.17, dol: 1.36, brl: 6.0, jpy: 183.2, cad: 1.75 },
+      jpy: { eur: 0.0064, dol: 0.0074, brl: 0.034, gbp: 0.0055, cad: 0.0095 },
+      cad: { eur: 0.67, dol: 0.78, brl: 3.5, gbp: 0.57, jpy: 105.2 },
+    };
+
+    return taxas[de]?.[para] || 1;
   };
 
   const handleConvert = (e) => {
@@ -24,6 +32,7 @@ function App() {
 
     if (!valor || valor <= 0) {
       setErro("Insira um valor válido");
+      setResultado(0);
       return;
     }
 
@@ -44,7 +53,10 @@ function App() {
                 type="number"
                 className="bg-white p-2"
                 value={valor}
-                onChange={(e) => setValor(Number(e.target.value))}
+                onChange={(e) => {
+                  setValor(Number(e.target.value));
+                  setErro(null);
+                }}
               />
             </div>
           </div>
@@ -58,7 +70,11 @@ function App() {
                 onChange={(e) => setDeMoeda(e.target.value)}
               >
                 <option value="eur">Euro</option>
-                <option value="dol">Dolar</option>
+                <option value="dol">Dólar</option>
+                <option value="brl">Real</option>
+                <option value="gbp">Libra</option>
+                <option value="jpy">Iene</option>
+                <option value="cad">Dólar Canadense</option>
               </select>
             </div>
             <div className="flex-1">
@@ -70,18 +86,35 @@ function App() {
                 onChange={(e) => setParaMoeda(e.target.value)}
               >
                 <option value="eur">Euro</option>
-                <option value="dol">Dolar</option>
+                <option value="dol">Dólar</option>
+                <option value="brl">Real</option>
+                <option value="gbp">Libra</option>
+                <option value="jpy">Iene</option>
+                <option value="cad">Dólar Canadense</option>
               </select>
             </div>
           </div>
           <div>
             <button className="bg-blue-500 w-full p-2">Converter</button>
+            <button
+              type="button"
+              onClick={() => {
+                const temp = deMoeda;
+                setDeMoeda(paraMoeda);
+                setParaMoeda(temp);
+                setErro(null);
+                setResultado(null);
+              }}
+              className="text-sm underline text-center w-full my-2"
+            >
+              Inverter moedas
+            </button>
           </div>
         </form>
 
         {erro && erro}
 
-        {resultado > 0 && (
+        {resultado !== null && (
           <div className="mt-4 text-center text-xl font-bold">
             {valor} {deMoeda.toUpperCase()} = {resultado}{" "}
             {paraMoeda.toUpperCase()}
